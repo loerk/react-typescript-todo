@@ -1,26 +1,64 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import InputField from './components/InputField';
+import TodoList from './components/TodoList';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import { useTodos } from './contexts/TodoContext';
 
-function App() {
+import { moveItemPosition } from './helper/helpers';
+const App = () => {
+  const { completedTodos, uncompletedTodos, handleDone, handleUpdateTodos } =
+    useTodos();
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+
+    if (!destination) {
+      return;
+    }
+    const sameSource = source.droppableId === destination.droppableId;
+    const noMovement = sameSource && destination.index === source.index;
+
+    if (noMovement) {
+      return;
+    }
+
+    if (source.droppableId === 'TodosList') {
+      if (sameSource) {
+        const updatedListOrder = moveItemPosition(
+          uncompletedTodos,
+          source.index,
+          destination.index
+        );
+
+        handleUpdateTodos([...updatedListOrder, ...completedTodos]);
+      } else {
+        handleDone(uncompletedTodos[source.index].id);
+      }
+    }
+
+    if (source.droppableId === 'TodosDoneList') {
+      if (sameSource) {
+        const updatedListOrder = moveItemPosition(
+          completedTodos,
+          source.index,
+          destination.index
+        );
+
+        handleUpdateTodos([...uncompletedTodos, ...updatedListOrder]);
+      } else {
+        handleDone(completedTodos[source.index].id);
+      }
+    }
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className='App'>
+        <span className='heading'>Taskify</span>
+        <InputField />
+        <TodoList />
+      </div>
+    </DragDropContext>
   );
-}
+};
 
 export default App;
