@@ -1,3 +1,5 @@
+while others care for important stuff i am building another todoapp:
+
 # Taskify
 
 This project is to practice state management with the React hooks useContext and useReducer while writing Typescript. Just a small app, nothing special, frontend only.
